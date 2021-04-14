@@ -1,4 +1,6 @@
-import { ApolloServer } from "apollo-server";
+import express from 'express';
+import cors from 'cors';
+import { ApolloServer } from'apollo-server-express';
 import { typeDefs } from "./apollo/type-defs.js";
 import { resolvers } from "./apollo/resolvers.js";
 import mongodb from "mongodb";
@@ -9,7 +11,7 @@ const { MongoClient } = mongodb;
 let db;
 
 const server = new ApolloServer({
-  cors: true,
+ 
   typeDefs,
   resolvers,
   context: async (ctx) => {
@@ -32,6 +34,12 @@ const server = new ApolloServer({
   },
 });
 
-server.listen().then(({ url }) => {
-  console.log(`🚀 Server ready at ${url}`);
-});
+await server.start();
+
+  const app = express();
+  app.use(cors())
+  server.applyMiddleware({ app, path: '/' });
+
+  app.listen(process.env.PORT, () => {
+    console.log(`🚀 Server is running at http://localhost:${process.env.PORT}`);
+  });
